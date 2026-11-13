@@ -1,0 +1,391 @@
+{
+  "info": {
+    "name": "Zenora Native API \u00b7 local candidate",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Zenora native API is deployed at https://api.zenora.dev/v1. Defaults target the isolated local harness. For production set api=https://api.zenora.dev, access=https://account.zenora.dev and redirect_uri=https://account.zenora.dev/native/callback/android. Follow workflows.http for reference and consent bodies. Never export runtime tokens in a shared collection."
+  },
+  "variable": [
+    {
+      "key": "api",
+      "value": "http://127.0.0.1:3300"
+    },
+    {
+      "key": "access",
+      "value": "http://127.0.0.1:3303"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "code",
+      "value": ""
+    },
+    {
+      "key": "verifier",
+      "value": ""
+    },
+    {
+      "key": "request_key",
+      "value": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "generation_id",
+      "value": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "library_item_id",
+      "value": "MS-0123456789"
+    },
+    {
+      "key": "camera_id",
+      "value": "40000000-0000-4000-8000-000000000002"
+    },
+    {
+      "key": "publication_id",
+      "value": "60000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "redirect_uri",
+      "value": "dev.zenora.android:/oauth/callback"
+    },
+    {
+      "key": "prompt_draft_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "OAuth metadata",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{access}}/.well-known/oauth-authorization-server"
+      }
+    },
+    {
+      "name": "Exchange code",
+      "request": {
+        "method": "POST",
+        "url": "{{access}}/oauth/token",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "key": "client_id",
+              "value": "zenora-android"
+            },
+            {
+              "key": "redirect_uri",
+              "value": "{{redirect_uri}}"
+            },
+            {
+              "key": "code",
+              "value": "{{code}}"
+            },
+            {
+              "key": "code_verifier",
+              "value": "{{verifier}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rotate refresh token ONCE",
+      "request": {
+        "method": "POST",
+        "url": "{{access}}/oauth/token",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "key": "client_id",
+              "value": "zenora-android"
+            },
+            {
+              "key": "refresh_token",
+              "value": "{{refresh_token}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Current account",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/me"
+      }
+    },
+    {
+      "name": "Capabilities",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/capabilities"
+      }
+    },
+    {
+      "name": "Generate / repeat this request after lost response",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{request_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{api}}/v1/generations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"A quiet coastal house in afternoon light.\",\n  \"seed\": null,\n  \"width\": 1024,\n  \"height\": 1536,\n  \"preset\": \"quality\",\n  \"previews\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Recover active work",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/generations/active"
+      }
+    },
+    {
+      "name": "Recover saved job",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/generations/{{generation_id}}"
+      }
+    },
+    {
+      "name": "Progress SSE",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/generations/{{generation_id}}/events"
+      }
+    },
+    {
+      "name": "Final PNG",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/generations/{{generation_id}}/result"
+      }
+    },
+    {
+      "name": "Library",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/library/items?page=1"
+      }
+    },
+    {
+      "name": "Prepare camera",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{request_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{api}}/v1/camera/tasks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kind\": \"depth\",\n  \"source_id\": \"{{generation_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Save camera view",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/camera/tasks/{{camera_id}}/save"
+      }
+    },
+    {
+      "name": "Sharing preview",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{api}}/v1/community/contributions/preview",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"source_id\": \"{{library_item_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Contribution status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/community/contributions/{{publication_id}}"
+      }
+    },
+    {
+      "name": "Public community",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{api}}/v1/community/images"
+      }
+    },
+    {
+      "name": "Describe a photo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{idempotency_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{api}}/v1/prompt-drafts",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"upload_id\": \"{{upload_id}}\"}"
+        }
+      }
+    },
+    {
+      "name": "Read photo description",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/prompt-drafts/{{prompt_draft_id}}"
+      }
+    },
+    {
+      "name": "Cancel photo description",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{api}}/v1/prompt-drafts/{{prompt_draft_id}}/cancel"
+      }
+    }
+  ]
+}

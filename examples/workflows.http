@@ -1,0 +1,175 @@
+# Sanitized templates. Defaults target the isolated local harness; production API and Access endpoints are live.
+# Variables use HTTP-client interpolation; access/refresh/code/verifier are obtained at runtime.
+@api = http://127.0.0.1:3300
+@access = http://127.0.0.1:3303
+@token = REPLACE_AT_RUNTIME
+@key = 10000000-0000-4000-8000-000000000001
+@generation = 10000000-0000-4000-8000-000000000001
+@upload = 20000000-0000-4000-8000-000000000001
+@selection = 30000000-0000-4000-8000-000000000001
+@scene = 40000000-0000-4000-8000-000000000001
+@view = 40000000-0000-4000-8000-000000000002
+@item = MS-0123456789
+
+### 1. Discovery. Launch authorization in the system browser using a fresh saved state/verifier.
+GET {{access}}/.well-known/oauth-authorization-server
+
+### 2. PKCE exchange, no secret/cookie. The harness redirect is test-only.
+POST {{access}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&client_id=zenora-android&redirect_uri=dev.zenora.android%3A%2Foauth%2Fcallback&code=REPLACE_AT_RUNTIME&code_verifier=REPLACE_WITH_SAVED_VERIFIER
+
+### 3. Identify account before replaying pending local mutations.
+GET {{api}}/v1/me
+Authorization: Bearer {{token}}
+
+### 4. Discover effective operations/limits.
+GET {{api}}/v1/capabilities
+Authorization: Bearer {{token}}
+
+### 5. Persist body/key/account BEFORE send. Omitted seed is random; here null preserves that choice.
+POST {{api}}/v1/generations
+Authorization: Bearer {{token}}
+Idempotency-Key: {{key}}
+Content-Type: application/json
+
+{"prompt":"A quiet coastal house in afternoon light.","seed":null,"width":1024,"height":1536,"preset":"quality","previews":true}
+
+### 6. Lost response: resend EXACTLY request5, same key/body, never a new key.
+### App terminated: restore the returned generation ID and account, then fetch it and active work.
+GET {{api}}/v1/generations/{{generation}}
+Authorization: Bearer {{token}}
+
+### 7. Foreground recovery.
+GET {{api}}/v1/generations/active
+Authorization: Bearer {{token}}
+
+### 8. Actual progress and cursor replay. Close stream on background; job continues.
+GET {{api}}/v1/generations/{{generation}}/events
+Authorization: Bearer {{token}}
+Last-Event-ID: 2-0
+Accept: text/event-stream
+
+### 9. Download only newest pending preview from its event URL.
+GET {{api}}/v1/generations/{{generation}}/previews/a1-s4
+Authorization: Bearer {{token}}
+
+### 10. Completed original bytes.
+GET {{api}}/v1/generations/{{generation}}/result?download=1
+Authorization: Bearer {{token}}
+
+### 11. Effective settings.
+GET {{api}}/v1/generations/{{generation}}/manifest
+Authorization: Bearer {{token}}
+
+### 12. Cooperative cancellation, never automatically replaces a request.
+POST {{api}}/v1/generations/{{generation}}/cancel
+Authorization: Bearer {{token}}
+
+### 13. Upload original bytes. Persist upload ID; retry same ID/bytes.
+PUT {{api}}/v1/uploads/{{upload}}
+Authorization: Bearer {{token}}
+Content-Type: image/png
+X-Filename: reference.png
+
+< ./fixtures/synthetic.png
+
+### 14. Analysis returns explicit person choices. Use a real returned person_id, not the sample placeholder.
+GET {{api}}/v1/uploads/{{upload}}
+Authorization: Bearer {{token}}
+
+### 15. Explicit role selection; changing it requires a new selection ID.
+PUT {{api}}/v1/uploads/selections/{{selection}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"asset_id":"{{upload}}","role":"face","person_id":"SELECT_RETURNED_PERSON","box":{"x":0.2,"y":0.1,"width":0.3,"height":0.3},"points":[]}
+
+### 16. Wait for selection.job.status=succeeded, then use the complete recipe.
+POST {{api}}/v1/generations
+Authorization: Bearer {{token}}
+Idempotency-Key: 10000000-0000-4000-8000-000000000002
+Content-Type: application/json
+
+{"prompt":"@Person1 in a sunlit studio.","seed":42,"width":1024,"height":1536,"preset":"quality","previews":true,"reference_recipe":{"version":"moss-references-v1","operation":"create","subjects":[{"id":"50000000-0000-4000-8000-000000000001","alias":"Person1","source_asset_id":"{{upload}}","placement":{"x":0.1,"y":0.05,"width":0.8,"height":0.9},"face":"{{selection}}","pose":null,"clothes":null}]}}
+
+### 17. Prepare depth. No worker ID, pipeline path or model parameter supplied by the app.
+POST {{api}}/v1/camera/tasks
+Authorization: Bearer {{token}}
+Idempotency-Key: {{scene}}
+Content-Type: application/json
+
+{"kind":"depth","source_id":"{{generation}}"}
+
+### 18. Read depth dimensions; /result is little-endian float32, not a PNG.
+GET {{api}}/v1/camera/tasks/{{scene}}/manifest
+Authorization: Bearer {{token}}
+
+### 19. After scene completion render a new view.
+POST {{api}}/v1/camera/tasks
+Authorization: Bearer {{token}}
+Idempotency-Key: {{view}}
+Content-Type: application/json
+
+{"kind":"camera_view","source_id":"{{generation}}","scene_id":"{{scene}}","camera":{"yaw":5,"pitch":0,"zoom":1},"seed":42}
+
+### 20. Save separate library variation after success.
+POST {{api}}/v1/camera/tasks/{{view}}/save
+Authorization: Bearer {{token}}
+
+### 21. Library with page-based pagination.
+GET {{api}}/v1/library/items?page=1&grouped=true
+Authorization: Bearer {{token}}
+
+### 22. Review every asset and license BEFORE consent.
+POST {{api}}/v1/community/contributions/preview
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"source_id":"{{item}}"}
+
+### 23. Explicit consent with exact preview hash and all reviewed asset IDs.
+POST {{api}}/v1/community/contributions
+Authorization: Bearer {{token}}
+Idempotency-Key: 60000000-0000-4000-8000-000000000001
+Content-Type: application/json
+
+{"source_id":"{{item}}","title":"Afternoon light","caption":"","preview_hash":"REPLACE_WITH_RETURNED_HASH","asset_consents":["result"],"rights_confirmed":true,"license":"CC-BY-4.0"}
+
+### 24. Poll contribution ID returned by23. Checking does not mean public.
+GET {{api}}/v1/community/contributions/60000000-0000-4000-8000-000000000002
+Authorization: Bearer {{token}}
+
+### 25. Public browse does not require a token.
+GET {{api}}/v1/community/images?page=1&view=selected
+
+### 26. Serialize refresh, save replacement atomically; never retry an uncertain refresh response.
+POST {{access}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token&client_id=zenora-android&refresh_token=REPLACE_AT_RUNTIME
+
+### 27. Expired token ->401; community-only token ->403 Studio; temporary identity outage ->503, not logout.
+GET {{api}}/v1/generations/active
+Authorization: Bearer {{token}}
+
+### 28. List and revoke own device sessions for logout.
+GET {{api}}/v1/me/sessions
+Authorization: Bearer {{token}}
+
+### Describe an owned uploaded photo (persist this key/body before sending)
+POST {{api}}/v1/prompt-drafts
+Authorization: Bearer {{access_token}}
+Idempotency-Key: {{idempotency_key}}
+Content-Type: application/json
+
+{"upload_id":"{{upload_id}}"}
+
+### Poll the task while foregrounded, or recover after reopening
+GET {{api}}/v1/prompt-drafts/{{prompt_draft_id}}
+Authorization: Bearer {{access_token}}
+
+### Cancel the same task; do not create a replacement generation
+POST {{api}}/v1/prompt-drafts/{{prompt_draft_id}}/cancel
+Authorization: Bearer {{access_token}}

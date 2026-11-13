@@ -1,0 +1,176 @@
+{
+  "generation": {
+    "schema": "Generation",
+    "body": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "request": {
+        "prompt": "A quiet coastal house in afternoon light.",
+        "seed": null,
+        "width": 1024,
+        "height": 1536,
+        "preset": "quality",
+        "previews": true
+      },
+      "job": {
+        "id": "10000000-0000-4000-8000-000000000001",
+        "status": "running",
+        "stage": "denoising",
+        "attempt": 1,
+        "seed": 42,
+        "completed_steps": 4,
+        "total_steps": 10,
+        "cancel_requested": false,
+        "created_at": "2026-11-12T00:00:00Z",
+        "updated_at": "2026-11-12T00:00:00Z",
+        "result_url": null,
+        "manifest_url": null,
+        "latest_preview_url": "/v1/generations/10000000-0000-4000-8000-000000000001/previews/a1-s4",
+        "error": null
+      },
+      "submission": {
+        "state": "accepted",
+        "retry_after_at": null
+      },
+      "submission_error": null,
+      "created_at": "2026-11-12T00:00:00Z",
+      "library_item_id": "MS-0123456789"
+    }
+  },
+  "progress": {
+    "schema": "JobEvent",
+    "body": {
+      "job_id": "10000000-0000-4000-8000-000000000001",
+      "attempt": 1,
+      "status": "running",
+      "stage": "denoising",
+      "completed_steps": 4,
+      "total_steps": 10,
+      "preview_url": "/v1/generations/10000000-0000-4000-8000-000000000001/previews/a1-s4"
+    }
+  },
+  "busy": {
+    "schema": "Problem",
+    "body": {
+      "type": "https://api.zenora.dev/problems/scheduler_busy",
+      "title": "scheduler busy",
+      "status": 503,
+      "detail": "Retry the same request key.",
+      "code": "scheduler_busy",
+      "request_id": "fixture-request",
+      "retryable": true,
+      "submission_id": "10000000-0000-4000-8000-000000000001",
+      "retry_after": 5
+    }
+  },
+  "community_only": {
+    "schema": "Me",
+    "body": {
+      "user": {
+        "id": "10000000-0000-4000-8000-000000000001",
+        "email": "member@example.test",
+        "name": "Example member",
+        "role": "member",
+        "studio_access": false,
+        "email_verified": true
+      },
+      "kind": "native",
+      "client_id": "zenora-android",
+      "session_id": "10000000-0000-4000-8000-000000000001",
+      "scopes": [
+        "community.read",
+        "community.write"
+      ],
+      "expires_at": "2026-11-12T00:10:00Z"
+    }
+  },
+  "selection": {
+    "schema": "ReferenceSelection",
+    "body": {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "asset_id": "20000000-0000-4000-8000-000000000001",
+      "role": "face",
+      "person_id": "p0",
+      "box": [
+        0.2,
+        0.1,
+        0.3,
+        0.3
+      ],
+      "source_box": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "job": {
+        "status": "succeeded",
+        "error": null
+      }
+    }
+  },
+  "denied": {
+    "schema": "Problem",
+    "body": {
+      "type": "https://api.zenora.dev/problems/insufficient_scope",
+      "title": "insufficient scope",
+      "status": 403,
+      "detail": "Studio access is by invitation.",
+      "code": "insufficient_scope",
+      "request_id": "fixture-request",
+      "retryable": false
+    }
+  },
+  "unavailable": {
+    "schema": "Problem",
+    "body": {
+      "type": "https://api.zenora.dev/problems/temporarily_unavailable",
+      "title": "temporarily unavailable",
+      "status": 503,
+      "detail": "Account service is unavailable.",
+      "code": "temporarily_unavailable",
+      "request_id": "fixture-request",
+      "retryable": true
+    }
+  },
+  "contribution": {
+    "schema": "Contribution",
+    "body": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "title": "Afternoon light",
+      "status": "checking",
+      "created_at": "2026-11-12T00:00:00Z",
+      "published_at": null,
+      "version": 1,
+      "decision": {}
+    }
+  },
+  "prompt_draft": {
+    "schema": "PromptDraft",
+    "body": {
+      "id": "10000000-0000-4000-8000-000000000099",
+      "upload_id": "10000000-0000-4000-8000-000000000098",
+      "profile": "zenora-photo-prompt-v1",
+      "submission": {
+        "state": "accepted",
+        "retry_after_at": null
+      },
+      "status": "succeeded",
+      "stage": "succeeded",
+      "attempt": 1,
+      "cancel_requested": false,
+      "scheduling": null,
+      "error": null,
+      "result": {
+        "prompt": "A green ceramic cup beside a window.",
+        "profile": "zenora-photo-prompt-v1",
+        "source_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "created_at": "2026-11-12T00:00:00Z",
+      "updated_at": "2026-11-12T00:00:02Z",
+      "links": {
+        "self": "/v1/prompt-drafts/10000000-0000-4000-8000-000000000099",
+        "cancel": "/v1/prompt-drafts/10000000-0000-4000-8000-000000000099/cancel"
+      }
+    }
+  }
+}

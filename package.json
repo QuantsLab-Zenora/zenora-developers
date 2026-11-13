@@ -1,0 +1,12 @@
+{
+  "name": "zenora-developers",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "uv run --frozen python scripts/build_site.py",
+    "test": "uv run --frozen python scripts/check_public.py"
+  },
+  "dependencies": {
+    "swagger-ui-dist": "5.34.1"
+  }
+}
