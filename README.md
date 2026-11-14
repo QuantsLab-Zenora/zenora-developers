@@ -7,6 +7,7 @@ Build native applications and server integrations with the versioned Zenora API.
 - [Authentication and device sessions](v1/authentication.md)
 - [Generation, library, references, camera and community workflows](v1/workflows.md)
 - [Describe a photo](v1/describe-photo.md)
+- [Effective generation models and presets](v1/model-profiles.md)
 - [Android](v1/android.md) · [iOS](v1/ios.md)
 - [Errors and recovery](v1/errors-and-recovery.md)
 - [OpenAPI 3.1 JSON](v1/openapi.json) · [HTTP examples](examples/workflows.http)

@@ -10668,6 +10668,12 @@
           },
           "updated_at": {
             "type": "string"
+          },
+          "model_profile": {
+            "type": "string"
+          },
+          "effective_settings": {
+            "$ref": "#/components/schemas/EffectiveSettings"
           }
         },
         "required": [
@@ -10767,6 +10773,12 @@
           },
           "library_stack_count": {
             "type": "integer"
+          },
+          "model_profile": {
+            "type": "string"
+          },
+          "effective_settings": {
+            "$ref": "#/components/schemas/EffectiveSettings"
           }
         },
         "required": [
@@ -10867,32 +10879,35 @@
                 "type": "object",
                 "properties": {
                   "quality": {
-                    "const": 10
+                    "type": "integer"
                   },
                   "fast": {
-                    "const": 8
+                    "type": "integer"
                   }
                 },
                 "required": [],
                 "additionalProperties": false
               },
               "cfg": {
-                "const": 1
+                "type": "number"
               },
               "sampler": {
-                "const": "er_sde"
+                "type": "string"
               },
               "scheduler": {
-                "const": "beta"
+                "type": "string"
               },
               "shift": {
-                "const": 5
+                "type": "number"
               },
               "available": {
                 "type": "boolean"
               },
               "repeatable": {
                 "type": "boolean"
+              },
+              "model": {
+                "$ref": "#/components/schemas/ModelProfile"
               }
             },
             "required": [],
@@ -12916,6 +12931,106 @@
             ]
           }
         }
+      },
+      "ModelPreset": {
+        "type": "object",
+        "required": [
+          "steps",
+          "cfg"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "steps": {
+            "type": "integer"
+          },
+          "cfg": {
+            "type": "number"
+          }
+        }
+      },
+      "ModelProfile": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "presets",
+          "sampler",
+          "scheduler",
+          "shift"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "presets": {
+            "type": "object",
+            "required": [
+              "quality",
+              "fast"
+            ],
+            "properties": {
+              "quality": {
+                "$ref": "#/components/schemas/ModelPreset"
+              },
+              "fast": {
+                "$ref": "#/components/schemas/ModelPreset"
+              }
+            },
+            "additionalProperties": false
+          },
+          "sampler": {
+            "type": "string"
+          },
+          "scheduler": {
+            "type": "string"
+          },
+          "shift": {
+            "type": "number"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "vae_dtype": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EffectiveSettings": {
+        "type": "object",
+        "properties": {
+          "model_profile": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "integer"
+          },
+          "cfg": {
+            "type": "number"
+          },
+          "sampler": {
+            "type": "string"
+          },
+          "scheduler": {
+            "type": "string"
+          },
+          "shift": {
+            "type": "number"
+          },
+          "vae_dtype": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       }
     }
   }
